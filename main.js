@@ -15,7 +15,7 @@ var card_gap = 10;
 var hand_x = 0;
 var hand_y = 0;
 var last_cards=[-1,-1];
-var card_selected = 0;
+var card_selected = -1;
 var mouse_x = 0;
 var mouse_y = 0;
 var card_strings = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
@@ -25,7 +25,6 @@ var state = "player_input"
 player_cards = [1,1,1,1,1,1,1,1,1,1,1,1,1];
 ai_cards = [1,1,1,1,1,1,1,1,1,1,1,1,1];
 score_cards = [0,1,2,3,4,5,6,7,8,9,10,11,12];
-
 
 function onMouseUpdate(e)
 {
@@ -40,6 +39,12 @@ function onMouseUpdate(e)
 
 // event listener for mouse movement
 document.addEventListener('mousemove',onMouseUpdate, false);
+document.addEventListener('mouseup',function(){
+	click = 0;
+},false);
+document.addEventListener('mousedown',function(){
+	click = 1;
+},false);
 
 function draw_card(x,y,width,height,num,mouse_over)
 {
@@ -80,6 +85,11 @@ function step()
 				card_selected = i;
 				break;
 			}
+		}
+		if (click && card_selected!=-1)
+		{
+			player_cards[card_selected] = 0;
+			click = 0;
 		}
 	}
 	else if (state==="some other state")
