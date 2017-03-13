@@ -19,12 +19,25 @@ var card_selected = -1;
 var mouse_x = 0;
 var mouse_y = 0;
 var card_strings = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
-
+var round_number = 0;
 var state = "player_input"
 
 player_cards = [1,1,1,1,1,1,1,1,1,1,1,1,1];
 ai_cards = [1,1,1,1,1,1,1,1,1,1,1,1,1];
 score_cards = [0,1,2,3,4,5,6,7,8,9,10,11,12];
+
+function shuffle_scores(){
+	var temp = null
+
+	for(i = 12; i >= 0; i -= 1) {
+		var x = Math.floor(Math.random() * (i + 1));
+		temp = score_cards[i];
+		score_cards[i] = score_cards[x];
+		score_cards[x] = temp;
+	}
+}
+
+shuffle_scores();
 
 function onMouseUpdate(e)
 {
@@ -89,30 +102,45 @@ function step()
 		if (click && card_selected!=-1)
 		{
 			player_cards[card_selected] = 0;
+			last_cards[0] = card_selected;
 			click = 0;
+			state = "ai_turn";
 		}
 	}
-	else if (state==="some other state")
+	else if (state==="ai_turn")
 	{
-
-	}
-
-	
+		card_selected = -1;
+		card_selected = choose_card(player_cards, ai_cards, score_cards);
+		ai_cards[card_selected] = 0;
+		last_cards[1] = card_selected;
+		state = "player_input";
+		
+		//Adjust scores for round.
+		if(last_cards[0] > last_cards[1]) player_score += score_cards[round_number];
+		else if (last_cards[1] > last_cards[0]) ai_score += score_cards[round_number];
+		
+		round_number++;
+		if(round_number == 14) state = "game_over";
+	}	
 }
 
 
 function draw()
 {
+	if(state === "game_over"){
+		game.drawText( 1280/2, 100, "28px Monospace", "rgba(128, 255, 255, 1)", "Final AI Score: "+ai_score);
+		game.drawText( 1280/2, 400, "28px Monospace", "rgba(128, 255, 255, 1)", "Final Player Score: "+player_score);
+	}
+	
+	
 	console.log(card_selected);
 	game.drawRectangle(0,0,width,height,"rgba(128,32,64,1)");
 	var i;
 	var mouseover = 0;
-	//for(i=1; i<14;i++)
-	//{
-	//	mouse_over = (i === card_selected);
-	//	draw_card((i-1)*100,0,64,103,card_strings[i],mouse_over);
-	//}
+
 	var mouse_over = -1;
+	
+	//The player's faceup cards.
 	for(i=0; i<14;i++)
 	{
 		if (player_cards[i]===1)
@@ -122,17 +150,21 @@ function draw()
 		}
 	}
 
+	//The AI's facedown cards.
 	for(i=0; i<count_card(ai_cards);i++)
 	{
 		game.drawRectangle(i*(card_width+card_gap),0,card_width,card_height,"rgba(128,255,255,1)");
 	}
 
-
+	//The most recently played cards.
 	if (last_cards[0]!== -1)
 	{
-		draw_card(0,360+card_height,card_width,card_height,card_strings[last_cards[0]],0);
-		draw_card(0,360-card_height,card_width,card_height,card_strings[last_cards[1]],1);
+		draw_card(20,360+card_height,card_width,card_height,card_strings[last_cards[0]],0);
+		draw_card(20,360-card_height,card_width,card_height,card_strings[last_cards[1]],1);
 	}
+	
+	//The current score card up for grabs.
+	draw_card(200, 360, card_width, card_height, score_cards[round_number], 0);
 
 	// draw ai score
 	game.drawText(1280-200,0,"28px Monospace","rgba(128,255,255,1)","Ai Score: "+ai_score);
