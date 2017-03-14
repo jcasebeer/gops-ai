@@ -115,26 +115,27 @@ function step()
 		last_cards[1] = card_selected;
 		state = "player_input";
 		
-		//Adjust scores for round.
-		if(last_cards[0] > last_cards[1]) player_score += score_cards[round_number];
-		else if (last_cards[1] > last_cards[0]) ai_score += score_cards[round_number];
+		//Adjust scores for round. Clamped to 1-10, to account for face cards, since score_cards is an array of indexes, not necessarily score values.
+		if(last_cards[0] > last_cards[1]) player_score += Math.max(Math.min(score_cards[round_number], 10), 1);
+		else if (last_cards[1] > last_cards[0]) ai_score += Math.max(Math.min(score_cards[round_number], 10), 1);
 		
 		round_number++;
-		if(round_number == 14) state = "game_over";
+		if(round_number == 13) state = "game_over";
 	}	
 }
 
 
 function draw()
 {
+	
+	console.log(card_selected);
+	game.drawRectangle(0,0,width,height,"rgba(16,160,60,1)");
 	if(state === "game_over"){
 		game.drawText( 1280/2, 100, "28px Monospace", "rgba(128, 255, 255, 1)", "Final AI Score: "+ai_score);
 		game.drawText( 1280/2, 400, "28px Monospace", "rgba(128, 255, 255, 1)", "Final Player Score: "+player_score);
+		return;
 	}
-	
-	
-	console.log(card_selected);
-	game.drawRectangle(0,0,width,height,"rgba(128,32,64,1)");
+
 	var i;
 	var mouseover = 0;
 
@@ -164,12 +165,17 @@ function draw()
 	}
 	
 	//The current score card up for grabs.
-	draw_card(200, 360, card_width, card_height, score_cards[round_number], 0);
+	draw_card(200, 360, card_width, card_height, card_strings[score_cards[round_number]], 0);
 
 	// draw ai score
 	game.drawText(1280-200,0,"28px Monospace","rgba(128,255,255,1)","Ai Score: "+ai_score);
 
 	game.drawText(1280-200,720-100,"28px Monospace","rgba(128,255,255,1)","Score: "+player_score);
+	
+	game.drawText(0, 150, "12px Monospace", "rgba(0, 0, 0, 1)", "AI Cards:");
+	for(i = 0; i < 13; i++){
+		game.drawText(30*i + 90, 150, "12px Monospace", "rgba(0, 0, 0, 1)", ""+ai_cards[i]+",");	
+	}
 }
 
 function update()
