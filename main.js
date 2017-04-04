@@ -20,7 +20,7 @@ var mouse_x = 0;
 var mouse_y = 0;
 var card_strings = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 var round_number = 0;
-var state = "player_input"
+var state = "player_input";
 
 player_cards = [1,1,1,1,1,1,1,1,1,1,1,1,1];
 ai_cards = [1,1,1,1,1,1,1,1,1,1,1,1,1];
@@ -110,14 +110,14 @@ function step()
 	else if (state==="ai_turn")
 	{
 		card_selected = -1;
-		card_selected = choose_card(player_cards, ai_cards, score_cards);
+		card_selected = choose_card(player_cards, ai_cards, score_cards, round_number);
 		ai_cards[card_selected] = 0;
 		last_cards[1] = card_selected;
 		state = "player_input";
 		
 		//Adjust scores for round. Clamped to 1-10, to account for face cards, since score_cards is an array of indexes, not necessarily score values.
-		if(last_cards[0] > last_cards[1]) player_score += Math.max(Math.min(score_cards[round_number], 10), 1);
-		else if (last_cards[1] > last_cards[0]) ai_score += Math.max(Math.min(score_cards[round_number], 10), 1);
+		if(last_cards[0] > last_cards[1]) player_score += Math.max(Math.min(score_cards[round_number]+1, 10), 1);
+		else if (last_cards[1] > last_cards[0]) ai_score += Math.max(Math.min(score_cards[round_number]+1, 10), 1);
 		
 		round_number++;
 		if(round_number == 13) state = "game_over";
