@@ -72,7 +72,7 @@ function draw_card(x,y,width,height,num,mouse_over)
 function count_card(hand)
 {
 	count = 0;
-	for(i=0; i<14;i++)
+	for(i=0; i<13;i++)
 	{
 		if (hand[i]===1)
 			count++;
@@ -116,8 +116,8 @@ function step()
 		state = "player_input";
 		
 		//Adjust scores for round. Clamped to 1-10, to account for face cards, since score_cards is an array of indexes, not necessarily score values.
-		if(last_cards[0] > last_cards[1]) player_score += Math.max(Math.min(score_cards[round_number]+1, 10), 1);
-		else if (last_cards[1] > last_cards[0]) ai_score += Math.max(Math.min(score_cards[round_number]+1, 10), 1);
+		if(last_cards[0] > last_cards[1]) player_score += score_cards[round_number]+1;
+		else if (last_cards[1] > last_cards[0]) ai_score += score_cards[round_number]+1;
 		
 		round_number++;
 		if(round_number == 13) state = "game_over";
@@ -142,7 +142,7 @@ function draw()
 	var mouse_over = -1;
 	
 	//The player's faceup cards.
-	for(i=0; i<14;i++)
+	for(i=0; i<13;i++)
 	{
 		if (player_cards[i]===1)
 		{
