@@ -110,7 +110,7 @@ function step()
 	else if (state==="ai_turn")
 	{
 		card_selected = -1;
-		card_selected = choose_card(player_cards, ai_cards, score_cards, round_number);
+		card_selected = choose_card(player_cards, ai_cards, score_cards, round_number, player_score, ai_score);
 		ai_cards[card_selected] = 0;
 		last_cards[1] = card_selected;
 		state = "player_input";
