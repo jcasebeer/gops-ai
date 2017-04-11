@@ -1,7 +1,7 @@
 function choose_card(player_cards,ai_cards,score_cards, round_number, player_score, ai_score)
 {
 	//There should be a smaller (~10% chance) of just going with Rando Cardrissian)
-	if(Math.random() * 100 < 10.0f || !game_winnable(player_score, ai_score, score_cards, round_number){
+	if(Math.random() * 100 < 10.0 || !game_winnable(player_score, ai_score, score_cards, round_number)){
 		return choose_random(player_cards, ai_cards, score_cards, round_number);
 	}
 
