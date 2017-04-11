@@ -1,7 +1,9 @@
-function choose_card(player_cards,ai_cards,score_cards, round_number)
+function choose_card(player_cards,ai_cards,score_cards, round_number, player_score, ai_score)
 {
 	//There should be a smaller (~10% chance) of just going with Rando Cardrissian)
-	if(Math.random() * 100 < 10.0f) return choose_random(player_cards, ai_cards, score_cards, round_number);
+	if(Math.random() * 100 < 10.0f || !game_winnable(player_score, ai_score, score_cards, round_number){
+		return choose_random(player_cards, ai_cards, score_cards, round_number);
+	}
 	
 	//Down here, we'll have our more robust card-choosing algorithms based on remaining
 	//number of cards.
@@ -12,6 +14,21 @@ function choose_card(player_cards,ai_cards,score_cards, round_number)
 	if(round_number > 6) return choose_recurse(player_cards, ai_cards, score_cards, round_number, 0, 0);
 	else return choose_direct(player_cards, ai_cards, score_cards, round_number);
 	
+}
+
+function game_winnable(player_score, ai_score, score_cards, round_number)
+{
+	var total_points = ai_score + player_score;
+	var previous_cards = 0;
+	var remaining_cards = 0;
+	for(i = 0; i < 13; i++){
+		if(i < round_number) previous_cards += score_cards[i];
+		else remaining_cards += score_cards[i];
+	}
+	var points_in_play = 91 - (previous_cards - total_points);
+	if(points_in_play - ai_score > remaining_cards) return false;
+	if(points_in_play - player_score > remaining_cards) return false;
+	return true;
 }
 
 function choose_random(player_cards, ai_cards, score_cards, round_number){
@@ -25,11 +42,21 @@ function choose_random(player_cards, ai_cards, score_cards, round_number){
 }
 
 function choose_recurse(player_cards, ai_cards, score_cards, round_number, selected, depth){
-	if(depth == 50) return selected;
+	depth++;
+	if(depth === 50) return selected;
 	//CARD-CHOOSING-INCREMENTING-WHATEVER LOGIC GOES HERE!
 	return choose_recurse(player_cards, ai_cards, score_cards, selected, depth);
 }
 
 function choose_direct(player_cards, ai_cards, score_cards, round_number){
-	return 0;
+	//Average available player cards and compare to the upcard.
+	
+	//If the average player card is HIGHER than the upcard, AI should play low.
+
+
+
+	//If LOWER, AI should play high.
+	
+	//There is also a small chance of acting opposite.
+	if(Math.random() * 
 }
