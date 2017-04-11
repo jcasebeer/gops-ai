@@ -1,7 +1,7 @@
 function choose_card(player_cards,ai_cards,score_cards, round_number)
 {
 	//There should be a smaller (~10% chance) of just going with Rando Cardrissian)
-	if(Math.random() * 100 < 10.0f) return choose_random(player_cards, ai_cards, score_cards, round_number);
+	if(Math.random() * 100 < 10.0) return choose_random(player_cards, ai_cards, score_cards, round_number);
 	
 	//Down here, we'll have our more robust card-choosing algorithms based on remaining
 	//number of cards.
@@ -32,4 +32,16 @@ function choose_recurse(player_cards, ai_cards, score_cards, round_number, selec
 
 function choose_direct(player_cards, ai_cards, score_cards, round_number){
 	return 0;
+}
+
+// returns the lowest card the ai can play to win a bid
+function best_lowest_card(player_cards, ai_cards)
+{
+	ai_max = max(ai_cards);
+	for(var i = 0; i<13; i++)
+	{
+		if (i > ai_max && player_cards[i])
+			return i;
+	}
+	return -1;
 }
