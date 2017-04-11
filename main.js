@@ -91,7 +91,7 @@ function step()
 	{
 		card_selected = -1;
 		var i;
-		for(i=0;i<14;i++)
+		for(i=0;i<13;i++)
 		{
 			if (point_in_rect(mouse_x,mouse_y,i*(card_width+card_gap),height-card_height,card_width,card_height))
 			{

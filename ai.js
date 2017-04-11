@@ -1,7 +1,7 @@
 function choose_card(player_cards,ai_cards,score_cards, round_number)
 {
 	//There should be a smaller (~10% chance) of just going with Rando Cardrissian)
-	return choose_random(player_cards, ai_cards, score_cards, round_number);
+	if(Math.random() * 100 < 10.0f) return choose_random(player_cards, ai_cards, score_cards, round_number);
 	
 	//Down here, we'll have our more robust card-choosing algorithms based on remaining
 	//number of cards.
@@ -20,7 +20,7 @@ function choose_random(player_cards, ai_cards, score_cards, round_number){
 	console.log("Random Card Selected: ")
 	console.log(i);
 	while(ai_cards[i+d] === 0 && ai_cards[i-d] === 0 && d < 13){d++;}
-	if(i+d < 14 && ai_cards[i+d] === 1) return i+d;
+	if(i+d < 13 && ai_cards[i+d] === 1) return i+d;
 	if(i - d > -1 && ai_cards[i-d] === 1) return i-d;
 }
 
