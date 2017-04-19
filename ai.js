@@ -4,16 +4,46 @@ function choose_card(player_cards,ai_cards,score_cards, round_number, player_sco
 	if(Math.random() * 100 < 10.0f || !game_winnable(player_score, ai_score, score_cards, round_number){
 		return choose_random(player_cards, ai_cards, score_cards, round_number);
 	}
+	//Since tier 1 always begins at 0, there are 4 indexes to denote the borders.
+	var ai_card_tiers = ai_cards;
+	var player_cards_tiers = player_cards;
+
+	//For each player_card, find out how what proportion of ai_cards outrank it.
+	for(x = 0; x < 13; x++){
+		//Find out where ai cards start to outrank this card.
+		var count = 0;
+		if(player_cards[x]{
+			for( y = 0; y < 13){
+				if(y > x && ai_cards[y] != 0) count++;
+			}
+			var tier = 0;
+			//This card goes into the lowest tier.
+			if(count / 13 > .25) tier = 1;
+			if(count / 13 > .5) tier = 2;
+			if(count / 13 > .75) tier = 3;
+			player_card_tiers[x] = tier;
+		}
+	}
 	
-	//Down here, we'll have our more robust card-choosing algorithms based on remaining
-	//number of cards.
-	//We can hardcode a bit more as the number of cards dwindles.
-	//Before that, we can have a recursive card-chooser that goes to a limited depth
-	//before calling it a day and returning the card it has selected.
+	//Split the AI_cards into even tiers.
+	var spots = 13 - round;
+	var count = 0;
+	var tier = 0;
+	for(x = 0; x < 13; x++){
+		if(count < spots/4 && AI_cards[x] != 0){
+			ai_card_tiers[x] = tier;
+			tier++;
+			count++;
+		}
+	}
+	
+	var selected_tier = 0;
+	//Run a straightforward Monte Carlo search tree based on the tiers.
+	
+	//Once we have the approximate best tier to play from, choose a random card from within that tier.
 	
 	if(round_number > 6) return choose_recurse(player_cards, ai_cards, score_cards, round_number, 0, 0);
 	else return choose_direct(player_cards, ai_cards, score_cards, round_number);
-	
 }
 
 function game_winnable(player_score, ai_score, score_cards, round_number)
