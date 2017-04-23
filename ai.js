@@ -1,10 +1,74 @@
 function choose_card(player_cards,ai_cards,score_cards, round_number, player_score, ai_score,min_win)
 {
+	console.log("player cards: "+card_sum(player_cards));
+	console.log("ai cards: "+card_sum(ai_cards));
+	
+	var c = best_lowest_card(player_cards,ai_cards);
+	var v = choose_random(player_cards,ai_cards,score_cards,round_number);
+	console.log("best lowest card: "+c);
+	var win_in_reach = (ai_score + score_cards[round_number]+1 >= min_win);
+	var swing_card = (ai_score+score_cards[round_number]+1 >= player_score && player_score+score_cards[round_number]+1 >= ai_score)
+	var player_win_in_reach = (player_score + score_cards[round_number]+1 >= min_win);
+	var comfy_margin = score_cards[round_number] + average_card(score_cards, round_number+1) < ai_score - player_score;
+	var player_median = median_hand(player_cards);
+	var ai_median = median_hand(ai_cards);
+	var average_score = average_card(score_cards);
+	if (c!=-1)
+	{
+		// force round win
+		if (win_in_reach || swing_card || player_win_in_reach) return c;
+		else
+		{
+			if (!comfy_margin)
+			{
+				if (round_number != 12)
+				{
+					ai_cards[c] = 0;
+					v = best_lowest_card(player_cards,ai_cards);
+					if (v ===-1)
+						v = closest_match(c, ai_cards);
+					if (v === -1)
+						v = choose_random(player_cards,ai_cards,score_cards,round_number);
+					ai_cards[c] = 1;
+				}
+			}
+			else
+			{
+				v = min(ai_cards);
+			}
+		}
+	}
+ 
+	if (card_sum(player_cards)>=card_sum(ai_cards))
+		return random_less(score_cards[round_number],ai_cards);
+	return v;
+	//return random_match(score_cards[round_number],ai_cards);
+	/*
+	if (Math.random()*100 > 50)
+	{
+		return choose_random(player_cards,ai_cards,score_cards,round_number);
+	}
+	else
+	{
+		if (player_cards[round_number]!=0)
+			return round_number;
+		else
+		{
+			var c;
+			c = best_lowest_card(player_cards,ai_cards);
+			if (c != -1)
+				return c;
+			else
+				choose_random(player_cards,ai_cards,score_cards,round_number);
+		}
+
+	}
+	
 	//There should be a smaller (~10% chance) of just going with Rando Cardrissian)
 	if(Math.random() * 100 < 10.0 || game_isover(player_score, ai_score, min_win)){
 		return choose_random(player_cards, ai_cards, score_cards, round_number);
 	}
-<<<<<<< HEAD
+
 	//Since tier 1 always begins at 0, there are 4 indexes to denote the borders.
 	var ai_card_tiers = ai_cards;
 	var player_cards_tiers = player_cards;
@@ -13,8 +77,8 @@ function choose_card(player_cards,ai_cards,score_cards, round_number, player_sco
 	for(x = 0; x < 13; x++){
 		//Find out where ai cards start to outrank this card.
 		var count = 0;
-		if(player_cards[x]{
-			for( y = 0; y < 13){
+		if(player_cards[x]){
+			for( y = 0; y < 13; y++){
 				if(y > x && ai_cards[y] != 0) count++;
 			}
 			var tier = 0;
@@ -45,7 +109,7 @@ function choose_card(player_cards,ai_cards,score_cards, round_number, player_sco
 	
 	if(round_number > 6) return choose_recurse(player_cards, ai_cards, score_cards, round_number, 0, 0);
 	else return choose_direct(player_cards, ai_cards, score_cards, round_number);
-=======
+
 
 	return choose_random(player_cards,ai_cards,score_cards,round_number);
 	//Down here, we'll have our more robust card-choosing algorithms based on remaining
@@ -53,11 +117,11 @@ function choose_card(player_cards,ai_cards,score_cards, round_number, player_sco
 	//We can hardcode a bit more as the number of cards dwindles.
 	//Before that, we can have a recursive card-chooser that goes to a limited depth
 	//before calling it a day and returning the card it has selected.
-	
+	*/
 	/*if(round_number > 6) return choose_recurse(player_cards, ai_cards, score_cards, round_number, 0, 0);
 	else return choose_direct(player_cards, ai_cards, score_cards, round_number);*/
 	
->>>>>>> 9186249ea475ec8015174dc6f0ff21dc1b39ee54
+
 }
 
 function game_winnable(player_score, ai_score, min_win)
@@ -87,13 +151,17 @@ function choose_random(player_cards, ai_cards, score_cards, round_number){
 	while(ai_cards[card]===0)
 		card = Math.floor(Math.random()*13);
 	return card;
-	/*var	i = Math.floor(Math.random()*13);
+/*
+	var	i = Math.floor(Math.random()*13);
 	var d = 0;
 	console.log("Random Card Selected: ")
 	console.log(i);
-	while(ai_cards[i+d] === 0 && ai_cards[i-d] === 0 && d < 13){d++;}
-	if(i+d < 13 && ai_cards[i+d] === 1) return i+d;
-	if(i - d > -1 && ai_cards[i-d] === 1) return i-d;*/
+	while(d < 13)
+	{
+		d++;
+		if(i+d < 13 && ai_cards[i+d] === 1) return i+d;
+		if(i - d > -1 && ai_cards[i-d] === 1) return i-d;
+	}*/
 }
 
 function choose_recurse(player_cards, ai_cards, score_cards, round_number, selected, depth){
@@ -107,13 +175,24 @@ function choose_direct(player_cards, ai_cards, score_cards, round_number){
 	return 0;
 }
 
+function max(list)
+{
+	console.log("max");
+	var i = list.length;
+	while(list[i-1]===0)
+		i--;
+	return i-1;
+}
+
 // returns the lowest card the ai can play to win a bid
 function best_lowest_card(player_cards, ai_cards)
 {
-	ai_max = max(ai_cards);
+	console.log("best_lowest_card");
+	player_max = max(player_cards);
+	//console.log("max "+player_max);
 	for(var i = 0; i<13; i++)
 	{
-		if (i > ai_max && player_cards[i])
+		if (i > player_max && ai_cards[i])
 			return i;
 	}
 	return -1;
@@ -126,4 +205,93 @@ function best_lowest_card(player_cards, ai_cards)
 	//If LOWER, AI should play high.
 	
 	//There is also a small chance of acting opposite.
+}
+
+function min(cards)
+{
+	console.log("min");
+	var i = 0;
+	while(cards[i]===0)
+		i++;
+	return i;
+}
+
+function card_sum(cards)
+{
+	console.log("card sum");
+	sum = 0;
+	for(i=0; i<cards.length; i++)
+	{
+		if (cards[i]===1)
+			sum+=i+1;
+	}
+	return sum;
+}
+
+function closest_match(c,cards)
+{
+	console.log("closest_match");
+	if (cards[c]===1)
+		return c;
+	else
+	{
+		var closest = -1;
+		for(var i = 0; i<cards.length; i++)
+		{
+			if (closest === -1 && cards[i] === 1)
+				closest = i;
+			else if (cards[i] === 1 && Math.abs(c-i) < Math.abs(c - closest))
+				closest = i;
+			console.log("sdjkshfd");
+		}
+		return closest;
+	}
+}
+
+function average_card(cards,index)
+{
+	var sum = 0;
+	var count = 0;
+	for(var i = index; i<cards.length; i++)
+	{
+		if (cards[i])
+		{
+			sum+=i+1;
+			count++;
+		}
+	}
+	if (sum === 0)
+		return 0;
+	return sum/count;
+}
+
+function median_hand(hand)
+{
+	cards = [];
+	for(var i = 0; i<hand.length; i++)
+		if (hand[i])
+			cards.push(i);
+	return cards[Math.floor(cards.length/2)];
+}
+
+function random_less(card,ai_cards)
+{
+	var can_do = 0;
+	for(var i = 0; i<card; i++)
+	{
+		if (ai_cards[i])
+		{
+			can_do = 1;
+			break;
+		}
+	}
+	if (can_do)
+	{
+		var c = Math.floor(Math.random()*card)
+		while(!ai_cards[c])
+			c = Math.floor(Math.random()*card);
+		return c;
+	}
+	else
+		return choose_random(player_cards,ai_cards,score_cards,round_number);
 }

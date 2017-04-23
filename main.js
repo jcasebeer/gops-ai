@@ -66,6 +66,8 @@ function draw_card(x,y,width,height,num,mouse_over)
 	var color = "rgba(255,0,0,1)";
 	if (mouse_over)
 		color = "rgba(0,0,255,1)";
+	if (mouse_over === 2)
+		color = "rgba(0,255,0,1)";
 
 	game.drawText(x+width/2,y+width/2,"28px Monospace",color,num);
 }
@@ -88,6 +90,7 @@ function point_in_rect(px,py,x,y,width,height)
 
 function step()
 {
+	var player_card_selected;
 	if (state==="player_input")
 	{
 		card_selected = -1;
@@ -102,17 +105,20 @@ function step()
 		}
 		if (click && card_selected!=-1)
 		{
-			player_cards[card_selected] = 0;
+			player_card_selected = card_selected;
+			console.log(player_card_selected);
 			last_cards[0] = card_selected;
 			click = 0;
 			state = "ai_turn";
 		}
 	}
-	else if (state==="ai_turn")
+	if (state==="ai_turn")
 	{
 		card_selected = -1;
 		card_selected = choose_card(player_cards, ai_cards, score_cards, round_number, player_score, ai_score, min_win);
 		ai_cards[card_selected] = 0;
+		console.log(player_card_selected);
+		player_cards[player_card_selected] = 0;
 		last_cards[1] = card_selected;
 		state = "player_input";
 		
@@ -128,9 +134,8 @@ function step()
 
 
 function draw()
-{
-	
-	console.log(card_selected);
+{	
+	//console.log(card_selected);
 	game.drawRectangle(0,0,width,height,"rgba(16,160,60,1)");
 	if(state === "game_over"){
 		game.drawText( 1280/2, 100, "28px Monospace", "rgba(128, 255, 255, 1)", "Final AI Score: "+ai_score);
@@ -167,7 +172,7 @@ function draw()
 	}
 	
 	//The current score card up for grabs.
-	draw_card(200, 360, card_width, card_height, card_strings[score_cards[round_number]], 0);
+	draw_card(200, 360, card_width, card_height, card_strings[score_cards[round_number]], 2);
 
 	// draw ai score
 	game.drawText(1280-200,0,"28px Monospace","rgba(128,255,255,1)","Ai Score: "+ai_score);
