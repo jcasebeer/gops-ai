@@ -21,6 +21,7 @@ var mouse_y = 0;
 var card_strings = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 var round_number = 0;
 var state = "player_input";
+var min_win = 46;
 
 player_cards = [1,1,1,1,1,1,1,1,1,1,1,1,1];
 ai_cards = [1,1,1,1,1,1,1,1,1,1,1,1,1];
@@ -93,7 +94,7 @@ function step()
 		var i;
 		for(i=0;i<13;i++)
 		{
-			if (point_in_rect(mouse_x,mouse_y,i*(card_width+card_gap),height-card_height,card_width,card_height))
+			if (point_in_rect(mouse_x,mouse_y,i*(card_width+card_gap),height-card_height,card_width,card_height) && player_cards[i]===1)
 			{
 				card_selected = i;
 				break;
@@ -110,7 +111,7 @@ function step()
 	else if (state==="ai_turn")
 	{
 		card_selected = -1;
-		card_selected = choose_card(player_cards, ai_cards, score_cards, round_number, player_score, ai_score);
+		card_selected = choose_card(player_cards, ai_cards, score_cards, round_number, player_score, ai_score, min_win);
 		ai_cards[card_selected] = 0;
 		last_cards[1] = card_selected;
 		state = "player_input";
@@ -118,6 +119,7 @@ function step()
 		//Adjust scores for round. Clamped to 1-10, to account for face cards, since score_cards is an array of indexes, not necessarily score values.
 		if(last_cards[0] > last_cards[1]) player_score += score_cards[round_number]+1;
 		else if (last_cards[1] > last_cards[0]) ai_score += score_cards[round_number]+1;
+		else min_win -= score_cards[round_number]+1;
 		
 		round_number++;
 		if(round_number == 13) state = "game_over";

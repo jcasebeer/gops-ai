@@ -7,6 +7,15 @@ function degstorads(degs)
 	return degs * (Math.PI/180);
 }
 
+function clamp(i,min,max)
+{
+	if (i<min)
+		return min;
+	else if (i>max)
+		return max;
+	return i;
+}
+
 function lengthdir_x(len,dir)
 //given a length and an angle (in Degrees), return the horizontal (x) component of 
 //the vector of the angle and direction
