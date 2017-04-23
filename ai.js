@@ -13,6 +13,12 @@ function choose_card(player_cards,ai_cards,score_cards, round_number, player_sco
 	var player_median = median_hand(player_cards);
 	var ai_median = median_hand(ai_cards);
 	var average_score = average_card(score_cards);
+	var permutations = mvp(score_cards,round_number,min_win,ai_score);
+	for (var i = 1; i<permutations.length; i++)
+	{
+		console.log(permutations[i] - permutations[i-1]);
+	}
+	console.log(permutations);//permutator(score_cards.splice(6,score_cards.length));
 	if (c!=-1)
 	{
 		// force round win
@@ -25,11 +31,12 @@ function choose_card(player_cards,ai_cards,score_cards, round_number, player_sco
 				{
 					ai_cards[c] = 0;
 					v = best_lowest_card(player_cards,ai_cards);
+					ai_cards[c] = 1;
 					if (v ===-1)
 						v = closest_match(c, ai_cards);
 					if (v === -1)
 						v = choose_random(player_cards,ai_cards,score_cards,round_number);
-					ai_cards[c] = 1;
+					
 				}
 			}
 			else
@@ -242,7 +249,6 @@ function closest_match(c,cards)
 				closest = i;
 			else if (cards[i] === 1 && Math.abs(c-i) < Math.abs(c - closest))
 				closest = i;
-			console.log("sdjkshfd");
 		}
 		return closest;
 	}
@@ -295,3 +301,62 @@ function random_less(card,ai_cards)
 	else
 		return choose_random(player_cards,ai_cards,score_cards,round_number);
 }
+
+function mvp(score_cards,round_number,min_win,score)
+{
+	var tallies = [0,0,0,0,0,0,0,0,0,0,0,0,0];
+	for(var count = 0; count<2**13; count++)
+	{
+		var bits = count;
+		var sum = 0;
+		for(var i = round_number; i<13; i++)
+		{
+			var pbit = bits & 1;
+			sum += pbit * score_cards[i];
+			bits = bits >> 1;
+		}
+		if(sum+score >= min_win){
+			bits = count;
+			//Increment the tally values.
+			for(var i = round_number; i < 13; i++){
+				var pbit = bits & 1;
+				if(pbit)
+					tallies[i]++;
+				bits = bits >> 1;
+			}
+		}
+	}
+	return tallies;
+}
+
+
+/*function permutator(inputArr) 
+{
+	var results = [];
+	function permute(arr, memo) 
+	{
+		var cur, memo = memo || [];
+
+		for (var i = 0; i < arr.length; i++) 
+		{
+			cur = arr.splice(i, 1);
+			if (arr.length === 0) 
+			{
+				results.push(memo.concat(cur));
+			}
+			permute(arr.slice(), memo.concat(cur));
+			arr.splice(i, 0, cur[0]);
+		}
+
+		return results;
+	}
+	return permute(inputArr);
+}*/
+
+/*
+function find most common card in permutation
+for(x = 0; x < 2^n; x++){
+	count++;
+
+}
+*/
