@@ -49,101 +49,10 @@ function choose_card(player_cards,ai_cards,score_cards, round_number, player_sco
 	if (card_sum(player_cards)>=card_sum(ai_cards))
 		return random_less(score_cards[round_number],ai_cards);
 	return v;
-	//return random_match(score_cards[round_number],ai_cards);
-	/*
-	if (Math.random()*100 > 50)
-	{
-		return choose_random(player_cards,ai_cards,score_cards,round_number);
-	}
-	else
-	{
-		if (player_cards[round_number]!=0)
-			return round_number;
-		else
-		{
-			var c;
-			c = best_lowest_card(player_cards,ai_cards);
-			if (c != -1)
-				return c;
-			else
-				choose_random(player_cards,ai_cards,score_cards,round_number);
-		}
-
-	}
-	
-	//There should be a smaller (~10% chance) of just going with Rando Cardrissian)
-	if(Math.random() * 100 < 10.0 || game_isover(player_score, ai_score, min_win)){
-		return choose_random(player_cards, ai_cards, score_cards, round_number);
-	}
-
-	//Since tier 1 always begins at 0, there are 4 indexes to denote the borders.
-	var ai_card_tiers = ai_cards;
-	var player_cards_tiers = player_cards;
-
-	//For each player_card, find out how what proportion of ai_cards outrank it.
-	for(x = 0; x < 13; x++){
-		//Find out where ai cards start to outrank this card.
-		var count = 0;
-		if(player_cards[x]){
-			for( y = 0; y < 13; y++){
-				if(y > x && ai_cards[y] != 0) count++;
-			}
-			var tier = 0;
-			//This card goes into the lowest tier.
-			if(count / 13 > .25) tier = 1;
-			if(count / 13 > .5) tier = 2;
-			if(count / 13 > .75) tier = 3;
-			player_card_tiers[x] = tier;
-		}
-	}
-	
-	//Split the AI_cards into even tiers.
-	var spots = 13 - round;
-	var count = 0;
-	var tier = 0;
-	for(x = 0; x < 13; x++){
-		if(count < spots/4 && AI_cards[x] != 0){
-			ai_card_tiers[x] = tier;
-			tier++;
-			count++;
-		}
-	}
-	
-	var selected_tier = 0;
-	//Run a straightforward Monte Carlo search tree based on the tiers.
-	
-	//Once we have the approximate best tier to play from, choose a random card from within that tier.
-	
-	if(round_number > 6) return choose_recurse(player_cards, ai_cards, score_cards, round_number, 0, 0);
-	else return choose_direct(player_cards, ai_cards, score_cards, round_number);
-
-
-	return choose_random(player_cards,ai_cards,score_cards,round_number);
-	//Down here, we'll have our more robust card-choosing algorithms based on remaining
-	//number of cards.
-	//We can hardcode a bit more as the number of cards dwindles.
-	//Before that, we can have a recursive card-chooser that goes to a limited depth
-	//before calling it a day and returning the card it has selected.
-	*/
-	/*if(round_number > 6) return choose_recurse(player_cards, ai_cards, score_cards, round_number, 0, 0);
-	else return choose_direct(player_cards, ai_cards, score_cards, round_number);*/
-	
-
 }
 
 function game_winnable(player_score, ai_score, min_win)
 {
-	/*var total_points = ai_score + player_score;
-	var previous_cards = 0;
-	var remaining_cards = 0;
-	for(i = 0; i < 13; i++){
-		if(i < round_number) previous_cards += score_cards[i];
-		else remaining_cards += score_cards[i];
-	}
-	var points_in_play = 91 - (previous_cards - total_points);
-	if(points_in_play - ai_score > remaining_cards) return false;
-	if(points_in_play - player_score > remaining_cards) return false;
-	return true;*/
 	return !(player_score >= min_win);
 }
 
@@ -158,24 +67,67 @@ function choose_random(player_cards, ai_cards, score_cards, round_number){
 	while(ai_cards[card]===0)
 		card = Math.floor(Math.random()*13);
 	return card;
-/*
-	var	i = Math.floor(Math.random()*13);
-	var d = 0;
-	console.log("Random Card Selected: ")
-	console.log(i);
-	while(d < 13)
-	{
-		d++;
-		if(i+d < 13 && ai_cards[i+d] === 1) return i+d;
-		if(i - d > -1 && ai_cards[i-d] === 1) return i-d;
-	}*/
 }
 
-function choose_recurse(player_cards, ai_cards, score_cards, round_number, selected, depth){
-	depth++;
-	if(depth === 50) return selected;
-	//CARD-CHOOSING-INCREMENTING-WHATEVER LOGIC GOES HERE!
-	return choose_recurse(player_cards, ai_cards, score_cards, selected, depth);
+function choose_best_odds(player_cards, ai_cards, round_number){
+	var player_cards_shuffled[13];
+	var ai_cards_shuffled[13];
+	var card_scores[13];
+	
+	//Fill up the cards with appropriate values.
+	var count = 0;
+	var p_index = 0;
+	var a_index = 0;
+	
+	while(count < 13){
+		if(player_cards[count]) player_cards_shuffled[p_index++] = count;
+		if(ai_cards[count]) ai_cards_shuffled[p_index++] = count;
+		count++;
+	}
+	
+	//Shuffle those suckers up.
+	for(i = 12-round_number; i >= 0; i -= 1) {
+		var x = Math.floor(Math.random() * (i + 1));
+		var y = Math.floor(Math.random() * (i + 1));
+		temp_a = player_cards_shuffled[i];
+		temp_b = ai_cards_shuffled[i];
+		player_cards_shuffled[x] = player_cards_shuffled[i];
+		ai_cards_shuffled[y] = ai_cards_shuffled[i];
+	}
+	
+	//For each card left in our hand, call count_recurse to find the highest likely tally of wins.
+	for(x = 0; x < 13-round_number; x++){
+		card_scores[x] = count_recurse(player_cards_shuffled, ai_cards_shuffled, 0, round_number);
+		//Cycle the cards around so that the next ai_card will be tested.
+		var front_card = ai_cards_shuffled[0];
+		for(y = 0; y < 12-round_number; y++){
+			ai_cards_shuffled[y] = ai_cards_shuffled[y+1];
+		}
+		ai_cards_shuffled[12-round_number] = front_card;
+	}
+	
+	//We'll have a full cycle finished, so the cards will be in their original (shuffled) setup.
+	//Choose the highest scoring card available.
+	var highest = 0;
+	for(x = 0; x < 13 - round_number; x++){
+		if(card_scores[x] > card_scores[highest]) highest = x;
+	}
+	
+	highest = 
+	
+	return highest;
+}
+
+function count_recurse(player_cards, ai_cards, score, round_number, depth, score){
+	//Increment depth. If we're deep enough, return the number of wins.
+	if(depth++ == 6) return score;
+	
+	//Choose the next random player card.
+	player_cards_shuffled[round_number-1];
+	
+	//Compare a win or loss, add it to the tally.
+	
+	
 }
 
 function choose_direct(player_cards, ai_cards, score_cards, round_number){
