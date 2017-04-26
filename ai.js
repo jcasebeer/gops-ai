@@ -1,4 +1,4 @@
-function choose_card(player_cards,ai_cards,score_cards, round_number, player_score, ai_score,min_win)
+function choose_card(player_cards,ai_cards,score_cards, round_number, player_score, ai_score,min_win,goal_set,player_set,ai_set,discard_set)
 {
 	console.log("player cards: "+card_sum(player_cards));
 	console.log("ai cards: "+card_sum(ai_cards));
@@ -13,12 +13,29 @@ function choose_card(player_cards,ai_cards,score_cards, round_number, player_sco
 	var player_median = median_hand(player_cards);
 	var ai_median = median_hand(ai_cards);
 	var average_score = average_card(score_cards);
-	var permutations = mvp(score_cards,round_number,min_win,ai_score);
-	for (var i = 1; i<permutations.length; i++)
+
+	if (cardInSet(score_cards[round_number]),goal_set)
 	{
-		console.log(permutations[i] - permutations[i-1]);
+		// we want that card!
+		return cardMap(score_cards[round_number],goal_set,ai_cards);
 	}
-	console.log(permutations);//permutator(score_cards.splice(6,score_cards.length));
+	else
+	{
+		// play our lowest card
+		for(var i = 0; i<13; i++)
+		{
+			if (cardInSet(i,arrayToSet(ai_cards)))
+				return i;
+		}
+		
+	}
+	//var permutations = mvp(score_cards,round_number,min_win,ai_score);
+
+	//for (var i = 1; i<permutations.length; i++)
+	//{
+		//console.log(permutations[i] - permutations[i-1]);
+	///}
+	//console.log(permutations);//permutator(score_cards.splice(6,score_cards.length));
 	if (c!=-1)
 	{
 		// force round win
@@ -244,6 +261,28 @@ function mvp(score_cards,round_number,min_win,score)
 	return tallies;
 }
 
+function cardMap(upcard,goal_set,ai_cards)
+{
+	var high_cards = [0];
+	var goal_cards = [0];
+	var w = 0;
+	var b = 0;
+	for(var i = 13; i>0; i--)
+	{
+		if (cardInSet(i,arrayToSet(ai_cards)))
+			high_cards[w++] = i;
+		if (cardInSet(i,goal_set))
+			goal_cards[b++] = i;
+	}
+
+	for(var i = 0; i<goal_cards.length;i++)
+	{
+		if (goal_cards[i] === upcard)
+			return high_cards[i];
+	}
+
+}
+
 function genGoalSet(ai_set,player_set,discard_set,score_cards,score,min_win)
 {
 	var sets = [];
@@ -263,17 +302,19 @@ function genGoalSet(ai_set,player_set,discard_set,score_cards,score,min_win)
 		// are not in the set 
 		if (sum+score>=min_win &&
 			isSubSet(ai_set,count) && 
-			!eitherSubset(player_set,count) &&
-			!eitherSubset(discard_set,count) )
+			!eitherSubset(player_set,count) || player_set===0 &&
+			!eitherSubset(discard_set,count) || discard_set===0 )
 		{
 			sets.push(count);
 		}
 
-
+		if (sets.length == 0)
+			return 0;
 		// pick one of the valid sets at random
-		return sets[Math.random()*set.length];
+		return sets[Math.random()*sets.length];
 	}
 }
+
 
 function cardInSet(card,set)
 {
@@ -287,7 +328,7 @@ function isSubSet(set1,set2)
 
 function eitherSubset(set1,set2)
 {
-	return isSubset(set1,set2) || isSubset(set2,set1);
+	return isSubSet(set1,set2) || isSubset(set2,set1);
 }
 
 function arrayToSet(a)
@@ -304,6 +345,17 @@ function arrayToSet(a)
 function addCardToSet(card,set)
 {
 	return set | (1<<card);
+}
+
+function printSet(set)
+{
+	var names = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+	var result;
+	for(var i = 0; i<13; i++)
+	{
+		if (cardInSet(i,set))
+			result.push(names[i]);
+	}
 }
 
 /*function permutator(inputArr) 
