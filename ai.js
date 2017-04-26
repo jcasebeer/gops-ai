@@ -69,65 +69,28 @@ function choose_random(player_cards, ai_cards, score_cards, round_number){
 	return card;
 }
 
-function choose_best_odds(player_cards, ai_cards, round_number){
-	var player_cards_shuffled[13];
-	var ai_cards_shuffled[13];
-	var card_scores[13];
+function choose_from_set(desired_cards, ai_cards, player_cards, upcard, round_number){
+	if(!(desired_cards >> upcard) & 1) return -1;	//If we don't want the upcard, throw it away.
 	
-	//Fill up the cards with appropriate values.
-	var count = 0;
-	var p_index = 0;
-	var a_index = 0;
+	//Otherwise, return the lowest card that will still beat the average player card.
+	var average_player_card = 0;
+	for(x = 0; x < 13; x++){
+		average_player_card += x * player_cards[x];
+	}
+	average_player_card /= (13-round_number);
 	
-	while(count < 13){
-		if(player_cards[count]) player_cards_shuffled[p_index++] = count;
-		if(ai_cards[count]) ai_cards_shuffled[p_index++] = count;
-		count++;
+	var best_lowest = 13;
+	for(x = 12; x >= 0; x--){
+		if(x * ai_cards > average_player_card) best_lowest = x * ai_cards[x];
 	}
 	
-	//Shuffle those suckers up.
-	for(i = 12-round_number; i >= 0; i -= 1) {
-		var x = Math.floor(Math.random() * (i + 1));
-		var y = Math.floor(Math.random() * (i + 1));
-		temp_a = player_cards_shuffled[i];
-		temp_b = ai_cards_shuffled[i];
-		player_cards_shuffled[x] = player_cards_shuffled[i];
-		ai_cards_shuffled[y] = ai_cards_shuffled[i];
+	//If we don't have one that will beat the average player card, play the highest.
+	if(best_lowest === 13){
+		best_lowest = 12;
+		while(ai_cards[best_lowest] === 0) best_lowest--;
 	}
 	
-	//For each card left in our hand, call count_recurse to find the highest likely tally of wins.
-	for(x = 0; x < 13-round_number; x++){
-		card_scores[x] = count_recurse(player_cards_shuffled, ai_cards_shuffled, 0, round_number);
-		//Cycle the cards around so that the next ai_card will be tested.
-		var front_card = ai_cards_shuffled[0];
-		for(y = 0; y < 12-round_number; y++){
-			ai_cards_shuffled[y] = ai_cards_shuffled[y+1];
-		}
-		ai_cards_shuffled[12-round_number] = front_card;
-	}
-	
-	//We'll have a full cycle finished, so the cards will be in their original (shuffled) setup.
-	//Choose the highest scoring card available.
-	var highest = 0;
-	for(x = 0; x < 13 - round_number; x++){
-		if(card_scores[x] > card_scores[highest]) highest = x;
-	}
-	
-	highest = 
-	
-	return highest;
-}
-
-function count_recurse(player_cards, ai_cards, score, round_number, depth, score){
-	//Increment depth. If we're deep enough, return the number of wins.
-	if(depth++ == 6) return score;
-	
-	//Choose the next random player card.
-	player_cards_shuffled[round_number-1];
-	
-	//Compare a win or loss, add it to the tally.
-	
-	
+	return best_lowest;
 }
 
 function choose_direct(player_cards, ai_cards, score_cards, round_number){
