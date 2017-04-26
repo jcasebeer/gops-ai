@@ -7,6 +7,10 @@ var input = new Input();
 var player_score = 0;
 var ai_score = 0;
 
+// cards player and ai have won
+var ai_set = 0;
+var player_set = 0;
+var discard_set = 0;
 
 var card_width = 64;
 var click = 0;
@@ -123,10 +127,21 @@ function step()
 		state = "player_input";
 		
 		//Adjust scores for round. Clamped to 1-10, to account for face cards, since score_cards is an array of indexes, not necessarily score values.
-		if(last_cards[0] > last_cards[1]) player_score += score_cards[round_number]+1;
-		else if (last_cards[1] > last_cards[0]) ai_score += score_cards[round_number]+1;
-		else min_win -= score_cards[round_number]+1;
-		
+		if(last_cards[0] > last_cards[1])
+		{
+		 	player_score += score_cards[round_number]+1;
+		 	player_set = addCardToSet(score_cards[round_number],player_set);
+		}
+		else if (last_cards[1] > last_cards[0])
+		{
+			ai_score += score_cards[round_number]+1;
+			ai_set = addCardToSet(score_cards[round_number],ai_set);
+		}
+		else
+		{ 
+			min_win -= score_cards[round_number]+1;
+			discard_set = addCardToSet(score_cards[round_number],discard_set);
+		}
 		round_number++;
 		if(round_number == 13) state = "game_over";
 	}	

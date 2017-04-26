@@ -7,7 +7,7 @@ function choose_card(player_cards,ai_cards,score_cards, round_number, player_sco
 	var v = choose_random(player_cards,ai_cards,score_cards,round_number);
 	console.log("best lowest card: "+c);
 	var win_in_reach = (ai_score + score_cards[round_number]+1 >= min_win);
-	var swing_card = (ai_score+score_cards[round_number]+1 >= player_score && player_score+score_cards[round_number]+1 >= ai_score)
+	var swing_card = (ai_score+score_cards[round_number]+1 >= player_score && player_score+score_cards[round_number]+1 >= ai_score);
 	var player_win_in_reach = (player_score + score_cards[round_number]+1 >= min_win);
 	var comfy_margin = score_cards[round_number] + average_card(score_cards, round_number+1) < ai_score - player_score;
 	var player_median = median_hand(player_cards);
@@ -281,6 +281,67 @@ function mvp(score_cards,round_number,min_win,score)
 	return tallies;
 }
 
+function genGoalSet(ai_set,player_set,discard_set,score_cards,score,min_win)
+{
+	var sets = [];
+	for(var count = 0; count<2**13; count++)
+	{
+		var bits = count;
+		var sum = 0;
+		// find sum of set
+		for(var i = round_number;i<13;i++)
+		{
+			var pbit = bits & 1;
+			sum += pbit * score_cards[i];
+			bits = bits >> 1;
+		}
+
+		// check for: is winning set, if cards we've already won are in the set, and if cards the player has won
+		// are not in the set 
+		if (sum+score>=min_win &&
+			isSubSet(ai_set,count) && 
+			!eitherSubset(player_set,count) &&
+			!eitherSubset(discard_set,count) )
+		{
+			sets.push(count);
+		}
+
+
+		// pick one of the valid sets at random
+		return sets[Math.random()*set.length];
+	}
+}
+
+function cardInSet(card,set)
+{
+	return (set >> card) & 1;
+}
+
+function isSubSet(set1,set2)
+{
+	return (set1 & set2) === set1;
+}
+
+function eitherSubset(set1,set2)
+{
+	return isSubset(set1,set2) || isSubset(set2,set1);
+}
+
+function arrayToSet(a)
+{
+	var set = 0;
+	for(var i = 0; i<a.length; i++)
+	{
+		if (a[i] === 1)
+		set = set | (1 << i);
+	}
+	return set;
+}
+
+function addCardToSet(card,set)
+{
+	return set | (1<<card);
+}
 
 /*function permutator(inputArr) 
 {
