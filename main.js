@@ -162,7 +162,7 @@ function step()
 		/*if (tie || (cardInSet(score_cards[round_number]) && player_won === 1) ||  (!cardInSet(score_cards[round_number]) && player_won===0))
 			goal_set = genGoalSet(ai_set,player_set,discard_set,score_cards,ai_score,min_win);*/
 
-		
+		if (recalc)
 		goal_set = genGoalSet(goal_set,ai_set,player_set,discard_set,score_cards,ai_score,min_win,round_number);
 			
 		//console.log(goal_set);

@@ -320,13 +320,13 @@ function genGoalSet(goal_set,ai_set,player_set,discard_set,score_cards,score,min
 		console.log("eitherSubset pset: "+((!eitherSubset(player_set,count) || player_set===0)));
 		console.log("eitherSubset dset: "+((!eitherSubset(discard_set,count) || discard_set===0)));*/
 		// check for: is winning set, if cards we've already won are in the set, and if cards the player has won
-		// are not in the set 
-		
+		// are not in the set 		
 		if (
-			((sum+score)>=min_win) &&
+			(setSum(count)>=min_win) &&
 			isSubSet(ai_set,count) && 
 			(!anyInSet(player_set,count)) &&
-			(!anyInSet(discard_set,count))
+			(!anyInSet(discard_set,count)) &&
+			cardInSet(score_cards[round_number],count)
 		)
 		{
 			sets.push(count);
@@ -336,13 +336,7 @@ function genGoalSet(goal_set,ai_set,player_set,discard_set,score_cards,score,min
 	if (sets.length === 0)
 			return 0;
 	
-	var smallest = 0;
-	for(var i = 0;i<sets.length;i++)
-	{
-		if(setLength(sets[i])<setLength(sets[smallest]))
-			smallest = i;
-	}
-	return sets[smallest];
+	return sets[Math.floor(Math.random()*sets.length)];
 	
 }
 
@@ -387,6 +381,17 @@ function setLength(s)
 	for(var i = 0; i<13; i++)
 		if (cardInSet(i,s))
 			sum++;
+	return sum;
+}
+
+function setSum(s)
+{
+	var sum = 0;
+	for(var i = 0; i<13;i++)
+	{
+		if (cardInSet(i,s))
+			sum+=i+1;
+	}
 	return sum;
 }
 
