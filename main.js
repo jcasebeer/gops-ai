@@ -46,7 +46,9 @@ function shuffle_scores(){
 
 shuffle_scores();
 
-goal_set = genGoalSet(ai_set,player_set,discard_set,score_cards,0,min_win);
+goal_set = genGoalSet(goal_set,ai_set,player_set,discard_set,score_cards,0,min_win,round_number);
+console.log("initial goal set:");
+printSet(goal_set);
 
 function onMouseUpdate(e)
 {
@@ -125,33 +127,67 @@ function step()
 		card_selected = -1;
 		card_selected = choose_card(player_cards, ai_cards, score_cards, round_number, player_score, ai_score, min_win, goal_set,player_set,ai_set,discard_set);
 		ai_cards[card_selected] = 0;
-		console.log(player_card_selected);
+		//console.log(player_card_selected);
 		player_cards[player_card_selected] = 0;
 		last_cards[1] = card_selected;
 		state = "player_input";
+		var recalc = 0;
 		
 		//Adjust scores for round. Clamped to 1-10, to account for face cards, since score_cards is an array of indexes, not necessarily score values.
 		if(last_cards[0] > last_cards[1])
 		{
-			player_won  = 1;
 		 	player_score += score_cards[round_number]+1;
 		 	player_set = addCardToSet(score_cards[round_number],player_set);
+			if (cardInSet(score_cards[round_number],goal_set))
+				recalc = 1;
 		}
 		else if (last_cards[1] > last_cards[0])
 		{
 			ai_score += score_cards[round_number]+1;
 			ai_set = addCardToSet(score_cards[round_number],ai_set);
+			if (!cardInSet(score_cards[round_number],goal_set))
+			{
+				recalc = 1;
+			}
 		}
 		else
 		{ 
+			//tie = 1;
 			min_win -= score_cards[round_number]+1;
 			discard_set = addCardToSet(score_cards[round_number],discard_set);
+			recalc = 1;
 		}
 
-		goal_set = genGoalSet(ai_set,player_set,discard_set,score_cards,ai_score,min_win);
-		console.log(goal_set);
-
 		round_number++;
+		/*if (tie || (cardInSet(score_cards[round_number]) && player_won === 1) ||  (!cardInSet(score_cards[round_number]) && player_won===0))
+			goal_set = genGoalSet(ai_set,player_set,discard_set,score_cards,ai_score,min_win);*/
+
+		
+		goal_set = genGoalSet(goal_set,ai_set,player_set,discard_set,score_cards,ai_score,min_win,round_number);
+			
+		//console.log(goal_set);
+
+		//round_number++;
+		//goal_set = genGoalSet(goal_set,ai_set,player_set,discard_set,score_cards,ai_score,min_win,round_number);
+		console.log("new goal_set:");
+			printSet(goal_set);
+
+			console.log("ai cards:");
+			printSet(arrayToSet(ai_cards));
+
+			console.log("cards ai has won: ");
+			printSet(ai_set);
+
+			console.log("player cards: ");
+			printSet(arrayToSet(player_cards));
+
+			console.log("cards player has won: ");
+			printSet(player_set);
+
+
+			console.log("discards: ");
+			printSet(discard_set);
+		
 		if(round_number == 13) state = "game_over";
 	}	
 }
