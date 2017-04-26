@@ -341,9 +341,9 @@ function genGoalSet(goal_set,ai_set,player_set,discard_set,score_cards,score,min
 }
 
 
-function cardInSet(card,set)
+function cardInSet(card,s)
 {
-	return (set >> card) & 1;
+	return (s >> card) & 1;
 }
 
 function isSubSet(set1,set2)
